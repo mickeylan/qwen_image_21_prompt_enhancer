@@ -1,0 +1,188 @@
+{
+  "last_node_id": 12,
+  "last_link_id": 11,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "QwenImage21PromptEnhancer",
+      "pos": [100, 200],
+      "size": [400, 600],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": {},
+      "outputs": {
+        "0": {"name": "enhanced_prompt", "type": "STRING", "links": [1]},
+        "1": {"name": "thinking", "type": "STRING", "links": null},
+        "2": {"name": "wh_ratio", "type": "STRING", "links": null},
+        "3": {"name": "ratio_follow", "type": "STRING", "links": null},
+        "4": {"name": "full_result", "type": "ENHANCED_PROMPT_RESULT", "links": null}
+      },
+      "properties": {},
+      "widgets_values": [
+        "a cat wearing sunglasses",
+        "t2i",
+        "en",
+        4096,
+        1.0,
+        0.95,
+        20,
+        0.0,
+        42,
+        false,
+        true
+      ]
+    },
+    {
+      "id": 2,
+      "type": "LoadImage",
+      "pos": [100, 100],
+      "size": [300, 400],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": {},
+      "outputs": {
+        "0": {"name": "IMAGE", "type": "IMAGE", "links": [11]},
+        "1": {"name": "mask", "type": "MASK", "links": null}
+      },
+      "properties": {},
+      "widgets_values": ["example.jpg"]
+    },
+    {
+      "id": 3,
+      "type": "HRQwen38DirectorConfig",
+      "pos": [100, 50],
+      "size": [300, 200],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": {},
+      "outputs": {
+        "0": {"name": "director_config", "type": "HR_DIRECTOR_CONFIG", "links": [10]}
+      },
+      "properties": {},
+      "widgets_values": ["auto", "auto", true, 2, "medium", false, 0, false, "qwen3.8"]
+    },
+    {
+      "id": 4,
+      "type": "LoadCheckpoint",
+      "pos": [600, 200],
+      "size": [300, 200],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": {},
+      "outputs": {
+        "0": {"name": "MODEL", "type": "MODEL", "links": [5]},
+        "1": {"name": "CLIP", "type": "CLIP", "links": null},
+        "2": {"name": "VAE", "type": "VAE", "links": null}
+      },
+      "properties": {},
+      "widgets_values": ["Qwen-Image-2.1"]
+    },
+    {
+      "id": 5,
+      "type": "CLIPTextEncode",
+      "pos": [600, 100],
+      "size": [300, 100],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": {
+        "1": {"name": "text", "type": "STRING", "link": 1},
+        "0": {"name": "clip", "type": "CLIP", "link": null}
+      },
+      "outputs": {
+        "0": {"name": "CONDITIONING", "type": "CONDITIONING", "links": [6]}
+      },
+      "properties": {}
+    },
+    {
+      "id": 6,
+      "type": "EmptyLatentImage",
+      "pos": [900, 100],
+      "size": [300, 100],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": {},
+      "outputs": {
+        "0": {"name": "LATENT", "type": "LATENT", "links": [7]}
+      },
+      "properties": {},
+      "widgets_values": [512, 512, 1]
+    },
+    {
+      "id": 7,
+      "type": "KSampler",
+      "pos": [900, 200],
+      "size": [300, 200],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": {
+        "0": {"name": "model", "type": "MODEL", "link": 5},
+        "1": {"name": "positive", "type": "CONDITIONING", "link": 6},
+        "2": {"name": "negative", "type": "CONDITIONING", "link": null},
+        "3": {"name": "latent_image", "type": "LATENT", "link": 7}
+      },
+      "outputs": {
+        "0": {"name": "LATENT", "type": "LATENT", "links": [8]}
+      },
+      "properties": {},
+      "widgets_values": [0, "fixed", 20, 8.0, "euler", "simple", 1.0]
+    },
+    {
+      "id": 8,
+      "type": "VAEDecode",
+      "pos": [1200, 200],
+      "size": [200, 100],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": {
+        "0": {"name": "samples", "type": "LATENT", "link": 8},
+        "1": {"name": "vae", "type": "VAE", "link": null}
+      },
+      "outputs": {
+        "0": {"name": "IMAGE", "type": "IMAGE", "links": [9]}
+      },
+      "properties": {}
+    },
+    {
+      "id": 9,
+      "type": "SaveImage",
+      "pos": [1400, 200],
+      "size": [300, 300],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": {
+        "0": {"name": "images", "type": "IMAGE", "link": 9}
+      },
+      "outputs": {},
+      "properties": {},
+      "widgets_values": ["output"]
+    }
+  ],
+  "links": [
+    [1, 1, 0, 5, 1, "STRING", "STRING"],
+    [5, 4, 0, 5, 0, "CLIP", "CLIP"],
+    [6, 5, 0, 7, 1, "CONDITIONING", "CONDITIONING"],
+    [7, 6, 0, 7, 3, "LATENT", "LATENT"],
+    [8, 7, 0, 8, 0, "LATENT", "LATENT"],
+    [9, 8, 0, 9, 0, "IMAGE", "IMAGE"],
+    [10, 3, 0, 1, 4, "HR_DIRECTOR_CONFIG", "HR_DIRECTOR_CONFIG"],
+    [11, 2, 0, 1, 3, "IMAGE", "IMAGE"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 1.0,
+      "offset": [0, 0]
+    }
+  },
+  "version": 0.4
+}
